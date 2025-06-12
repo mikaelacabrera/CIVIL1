@@ -1,1 +1,443 @@
-hola
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño de Viga a Flexión - ACI 318-19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .results-section {
+            background: #e8f5e8;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 1.1em;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #27ae60;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 1.3em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .beam-diagram {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Diseño de Viga a Flexión</h1>
+            <p>Según Normativa ACI 318-19</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">📊 Parámetros de Diseño</h2>
+                
+                <div class="input-group">
+                    <label for="fc">f'c - Resistencia del concreto (MPa):</label>
+                    <input type="number" id="fc" value="25" step="0.1" min="17">
+                </div>
+                
+                <div class="input-group">
+                    <label for="fy">fy - Resistencia del acero (MPa):</label>
+                    <input type="number" id="fy" value="420" step="1" min="280">
+                </div>
+                
+                <div class="input-group">
+                    <label for="b">b - Ancho de la viga (cm):</label>
+                    <input type="number" id="b" value="30" step="0.1" min="15">
+                </div>
+                
+                <div class="input-group">
+                    <label for="h">h - Altura total de la viga (cm):</label>
+                    <input type="number" id="h" value="60" step="0.1" min="25">
+                </div>
+                
+                <div class="input-group">
+                    <label for="d">d - Altura efectiva (cm):</label>
+                    <input type="number" id="d" value="55" step="0.1" min="20">
+                </div>
+                
+                <div class="input-group">
+                    <label for="mu">Mu - Momento último (kN⋅m):</label>
+                    <input type="number" id="mu" value="150" step="0.1" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="phi">φ - Factor de reducción:</label>
+                    <select id="phi">
+                        <option value="0.9">0.90 (Flexión controlada por tracción)</option>
+                        <option value="0.65">0.65 (Flexión controlada por compresión)</option>
+                        <option value="0.75">0.75 (Espirales)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="cover">Recubrimiento (cm):</label>
+                    <input type="number" id="cover" value="4" step="0.1" min="2">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateBeam()">
+                    🔄 Calcular Diseño
+                </button>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title">📋 Resultados del Diseño</h2>
+                
+                <div id="results">
+                    <div class="result-item">
+                        <div class="result-label">Haga clic en "Calcular Diseño" para obtener los resultados</div>
+                    </div>
+                </div>
+                
+                <div class="beam-diagram" id="diagram">
+                    <h3>📐 Diagrama de la Viga</h3>
+                    <div style="margin: 20px 0;">
+                        <svg width="100%" height="200" viewBox="0 0 400 200">
+                            <rect x="50" y="80" width="300" height="80" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                            <text x="200" y="125" text-anchor="middle" fill="white" font-weight="bold">VIGA</text>
+                            <text x="200" y="105" text-anchor="middle" fill="white" font-size="12">b × h</text>
+                            
+                            <!-- Dimensiones -->
+                            <line x1="50" y1="170" x2="350" y2="170" stroke="#2c3e50" stroke-width="2"/>
+                            <line x1="50" y1="165" x2="50" y2="175" stroke="#2c3e50" stroke-width="2"/>
+                            <line x1="350" y1="165" x2="350" y2="175" stroke="#2c3e50" stroke-width="2"/>
+                            <text x="200" y="190" text-anchor="middle" fill="#2c3e50" font-weight="bold">L</text>
+                            
+                            <line x1="30" y1="80" x2="30" y2="160" stroke="#2c3e50" stroke-width="2"/>
+                            <line x1="25" y1="80" x2="35" y2="80" stroke="#2c3e50" stroke-width="2"/>
+                            <line x1="25" y1="160" x2="35" y2="160" stroke="#2c3e50" stroke-width="2"/>
+                            <text x="15" y="125" text-anchor="middle" fill="#2c3e50" font-weight="bold">h</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateBeam() {
+            // Obtener valores de entrada
+            const fc = parseFloat(document.getElementById('fc').value);
+            const fy = parseFloat(document.getElementById('fy').value);
+            const b = parseFloat(document.getElementById('b').value);
+            const h = parseFloat(document.getElementById('h').value);
+            const d = parseFloat(document.getElementById('d').value);
+            const Mu = parseFloat(document.getElementById('mu').value);
+            const phi = parseFloat(document.getElementById('phi').value);
+            const cover = parseFloat(document.getElementById('cover').value);
+            
+            // Conversiones de unidades
+            const fc_Pa = fc * 1e6; // MPa a Pa
+            const fy_Pa = fy * 1e6; // MPa a Pa
+            const b_m = b / 100; // cm a m
+            const h_m = h / 100; // cm a m
+            const d_m = d / 100; // cm a m
+            const Mu_Nm = Mu * 1000; // kN⋅m a N⋅m
+            
+            // Cálculos según ACI 318-19
+            const beta1 = fc <= 28 ? 0.85 : Math.max(0.85 - 0.05 * (fc - 28) / 7, 0.65);
+            const rho_max = 0.75 * (0.85 * beta1 * fc_Pa / fy_Pa) * (87000 / (87000 + fy_Pa / 1000));
+            const rho_min = Math.max(1.4 / fy, Math.sqrt(fc) / (4 * fy));
+            
+            // Momento resistente requerido
+            const Mn_req = Mu_Nm / phi;
+            
+            // Cálculo del acero requerido usando método iterativo simplificado
+            const Rn = Mn_req / (b_m * d_m * d_m);
+            const m = fy_Pa / (0.85 * fc_Pa);
+            const rho_req = (1 / m) * (1 - Math.sqrt(1 - 2 * m * Rn / fy_Pa));
+            
+            // Área de acero requerida
+            const As_req = rho_req * b_m * d_m * 10000; // en cm²
+            
+            // Verificaciones
+            const rho_min_area = rho_min * b_m * d_m * 10000; // en cm²
+            const rho_max_area = rho_max * b_m * d_m * 10000; // en cm²
+            const As_design = Math.max(As_req, rho_min_area);
+            
+            // Número de barras (asumiendo barras #6 = 2.85 cm²)
+            const area_bar = 2.85; // cm² para barra #6
+            const num_bars = Math.ceil(As_design / area_bar);
+            const As_provided = num_bars * area_bar;
+            
+            // Factor de utilización
+            const utilization = (As_req / As_provided) * 100;
+            
+            // Momento resistente real
+            const rho_actual = As_provided / (b * d);
+            const a = (As_provided / 100) * fy_Pa / (0.85 * fc_Pa * b_m) * 100; // en cm
+            const Mn_actual = (As_provided / 10000) * fy_Pa * (d_m - a / 200) / 1000; // kN⋅m
+            const Mr = phi * Mn_actual;
+            
+            // Mostrar resultados
+            displayResults({
+                fc, fy, b, h, d, Mu, phi, cover,
+                beta1, rho_min, rho_max, rho_min_area, rho_max_area,
+                As_req, As_design, As_provided, num_bars, utilization,
+                Mn_req: Mn_req/1000, Mn_actual, Mr, a, rho_actual
+            });
+        }
+        
+        function displayResults(calc) {
+            const resultsDiv = document.getElementById('results');
+            
+            let status = '';
+            let statusClass = '';
+            
+            if (calc.As_provided >= calc.rho_max_area) {
+                status = '⚠️ ADVERTENCIA: El área de acero excede el máximo permitido. Considere aumentar las dimensiones de la viga.';
+                statusClass = 'warning';
+            } else if (calc.Mr < calc.Mu) {
+                status = '❌ ERROR: El momento resistente es menor al momento último requerido.';
+                statusClass = 'error';
+            } else {
+                status = '✅ ÉXITO: El diseño cumple con todos los requisitos del ACI 318-19.';
+                statusClass = 'success';
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="${statusClass}">
+                    <strong>${status}</strong>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">β₁ - Factor de bloque de compresión:</div>
+                    <div class="result-value">${calc.beta1.toFixed(3)}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">ρ mín - Cuantía mínima:</div>
+                    <div class="result-value">${(calc.rho_min * 100).toFixed(4)}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">ρ máx - Cuantía máxima:</div>
+                    <div class="result-value">${(calc.rho_max * 100).toFixed(4)}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">As req - Área de acero requerida:</div>
+                    <div class="result-value">${calc.As_req.toFixed(2)} cm²</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">As min - Área de acero mínima:</div>
+                    <div class="result-value">${calc.rho_min_area.toFixed(2)} cm²</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">As diseño - Área de acero a usar:</div>
+                    <div class="result-value">${calc.As_design.toFixed(2)} cm²</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Barras propuestas:</div>
+                    <div class="result-value">${calc.num_bars} ø #6 (${calc.As_provided.toFixed(2)} cm²)</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Factor de utilización:</div>
+                    <div class="result-value">${calc.utilization.toFixed(1)}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">a - Profundidad del bloque de compresión:</div>
+                    <div class="result-value">${calc.a.toFixed(2)} cm</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Mn - Momento nominal:</div>
+                    <div class="result-value">${calc.Mn_actual.toFixed(2)} kN⋅m</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">φMn - Momento resistente:</div>
+                    <div class="result-value">${calc.Mr.toFixed(2)} kN⋅m</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Relación φMn/Mu:</div>
+                    <div class="result-value">${(calc.Mr/calc.Mu).toFixed(3)}</div>
+                </div>
+            `;
+        }
+        
+        // Calcular automáticamente cuando se cambian los valores
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', calculateBeam);
+        });
+        
+        // Cálculo inicial
+        calculateBeam();
+    </script>
+</body>
+</html>
